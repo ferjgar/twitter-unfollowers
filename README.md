@@ -5,11 +5,6 @@ Pequeña clase de PHP para obtener los unfollowers de una cuenta de Twitter.
 
 Por su naturaleza está pensado para ser ejecutado periódicamente como una tarea de `cron`, como en el ejemplo `twitter_unfollowers_cron.php`.
 
-Twitter OAuth
--------------
-
-Utilizo la librería [twitteroauth][1] de [abraham][2]
-
 Limitaciones
 ------------
 
