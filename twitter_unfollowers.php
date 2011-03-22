@@ -4,7 +4,7 @@
  * Script para obtener los usuarios que te han hecho unfollow en Twitter
  * Detalles en http://www.usuariodeinternet.es/desarrollo/twitter-unfollowers
  * @author Fernando García <http://www.usuariodeinternet.es>
- * @version 1.1
+ * @version 1.2
  */
 
 // INICIO PERSONALIZACIÓN
@@ -81,14 +81,16 @@ class Twitter_unfollowers
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
 
-		$lista_followers = curl_exec($ch);
+		$lista_followers_json = curl_exec($ch);
+		$lista_followers = json_decode($lista_followers_json);
 
 		curl_close($ch);
 
-		if(!empty($lista_followers))
+		if(empty($lista_followers->error))
 		{
-			file_put_contents(str_replace('{USUARIO}', strtolower($this->usuario_twitter), FIC_GUARDADO), $lista_followers);
-			return json_decode($lista_followers);
+			file_put_contents(str_replace('{USUARIO}', strtolower($this->usuario_twitter), FIC_GUARDADO), $lista_followers_json);
+
+			return $lista_followers;
 		}
 		else
 		{
@@ -139,7 +141,7 @@ class Twitter_unfollowers
 		}
 		else
 		{
-			return array();
+			return array('id' => $user_id);
 		}
 	}
 
@@ -161,13 +163,20 @@ class Twitter_unfollowers
 		$email_cuerpo = 'Te han desfollogüeado brutalmente los siguientes usuarios:<br/><br/><table cellspancing="6" cellpadding="6" border="1">';
 		foreach($unfollowers_info as $unfollower_info)
 		{
-			$email_cuerpo .= '<tr><td><img src="' . $unfollower_info['imagen'] . '" /></td>';
-			$email_cuerpo .= '<td><a href="http://twitter.com/' . $unfollower_info['nombre'] . '">' . $unfollower_info['nombre'] . '</a></td>';
-			if($unfollower_info['following'])
+			if(isset($unfollower_info['id']))
 			{
-				$email_cuerpo .= '<td>le estás siguiendo :(</td>';
+				$email_cuerpo .= '<tr><td>usuario no accesible con id ' . $unfollower_info['id'] . '</td></tr>';
 			}
-			$email_cuerpo .= '</tr>';
+			else
+			{
+				$email_cuerpo .= '<tr><td><img src="' . $unfollower_info['imagen'] . '" /></td>';
+				$email_cuerpo .= '<td><a href="http://twitter.com/' . $unfollower_info['nombre'] . '">' . $unfollower_info['nombre'] . '</a></td>';
+				if($unfollower_info['following'])
+				{
+					$email_cuerpo .= '<td>le estás siguiendo :(</td>';
+				}
+				$email_cuerpo .= '</tr>';
+			}
 		}
 		$email_cuerpo .= '</table>';
 
@@ -176,7 +185,7 @@ class Twitter_unfollowers
 		$email_cabeceras .= 'To: ' . EMAIL_DIRECCION . "\r\n";
 		$email_cabeceras .= 'From: ' . EMAIL_REMITENTE . "\r\n";
 
-		mail(EMAIL_DIRECCION, $email_asunto, $email_cuerpo, $email_cabeceras);
+		mail(EMAIL_DIRECCION, '=?UTF-8?B?' . base64_encode($email_asunto) . '?=', $email_cuerpo, $email_cabeceras);
 	}
 }
 
