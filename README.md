@@ -17,5 +17,3 @@ Más información
 En el siguiente post se detallan los pasos dados para el desarrollo: [Twitter Unfollowers][blog]
 
 [blog]: http://ferjgar.rocks/desarrollo/twitter-unfollowers
-[1]: https://github.com/abraham/twitteroauth
-[2]: https://github.com/abraham
